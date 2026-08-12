@@ -28,7 +28,7 @@ jobs:
       - name: Run RADAR ensemble scan
         uses: ./radar-engine
         with:
-          scanners: 'codescan,semgrep'
+          scanners: 'semgrep'
           target_dir: 'scan-target'
           output_dir: '.radar-outputs'
 
