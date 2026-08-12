@@ -1,0 +1,48 @@
+name: RADAR Ensemble Scan (SARIF demo)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  radar-scan:
+    name: RADAR Ensemble Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout target repo (kestrel)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: scan-target
+
+      - name: Checkout RADAR engine (private, read-only token)
+        uses: actions/checkout@v4
+        with:
+          repository: pvaluelabs/integrated-intelligence
+          ref: ensemble-action-p5
+          token: ${{ secrets.RADAR_ENGINE_TOKEN }}
+          path: radar-engine
+
+      - name: Run RADAR ensemble scan
+        uses: ./radar-engine
+        with:
+          scanners: 'codescan,semgrep'
+          target_dir: 'scan-target'
+          output_dir: '.radar-outputs'
+
+      - name: Upload artifacts (report + dashboard + sarif)
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-results
+          path: |
+            .radar-outputs/report.json
+            .radar-outputs/index.html
+            .radar-outputs/results.sarif
+
+      - name: Upload SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: .radar-outputs/results.sarif
+          checkout_path: scan-target
