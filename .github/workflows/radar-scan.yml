@@ -25,6 +25,9 @@ jobs:
           token: ${{ secrets.RADAR_ENGINE_TOKEN }}
           path: radar-engine
 
+      - name: Prepare writable output directory
+        run: mkdir -p .radar-outputs && chmod 0777 .radar-outputs
+
       - name: Run RADAR ensemble scan
         uses: ./radar-engine
         with:
